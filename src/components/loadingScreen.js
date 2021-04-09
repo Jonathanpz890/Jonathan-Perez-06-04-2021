@@ -10,7 +10,9 @@ export default class LoadingScreen extends Component {
     }
     animate = () => {
         setTimeout(() => {
-            this.img.current.classList.add('big');
+            if (this.img.current) {
+                this.img.current.classList.add('big');
+            }
             setTimeout(() => {
                 if (this.img.current) {
                     this.img.current.classList.remove('big');
@@ -18,7 +20,9 @@ export default class LoadingScreen extends Component {
             }, 1000)
         }, 200)
         const interval = setInterval(() => {
-            this.img.current.classList.add('big');
+            if (this.img.current) {
+                this.img.current.classList.add('big');
+            }
             setTimeout(() => {
                 if (this.img.current) {
                     this.img.current.classList.remove('big');

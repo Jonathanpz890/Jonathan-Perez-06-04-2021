@@ -12,19 +12,25 @@ export default function useSearch(text) {
     // const apikey = 'VBzXMPmu5eWkDlUivT7VdIUWZYEqAG0H';
     // const apikey = '5eJbuDZmUMEZGQ16FJ0uDuhGvMOXu366';
     // const apikey = 'lBu66EmnhBvyZs1LrbGEdpAoIngA2F9G';
-    const apikey = 'kY8Opl0WFOzNYorp5nmoX4fHMD3VSu2N';
-
-    const [cityID, setCityID] = useState('')
-    useEffect(async () => {
-        await fetch(`http://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apikey}&q=${text}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data[0]) {
-                setCityID(data[0].Key);
+    const apikey = '5mLooQmy9jmzMXfrkq1DG5rbTAC2RDqr';
+    const [searchIDError, setSearchIDError] = useState(false);
+    const [searchID, setSearchID] = useState('')
+    
+    useEffect(() => {
+        const search = async () => {
+            const cityRes = await fetch(`https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${apikey}&q=${text}`).catch(error => {
+                console.log(error);
+                setSearchIDError(true)
+            })
+            if (!cityRes) {return null};
+            const cityData = await cityRes.json();
+            if (cityData[0]) {
+                setSearchID(cityData[0].Key);
             } else {
-                setCityID('');
+                setSearchID('');
             }
-        })
+        }
+        search();
     }, [text])
-    return cityID
+    return {searchID, searchIDError};
 }

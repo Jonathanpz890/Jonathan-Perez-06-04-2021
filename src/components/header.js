@@ -1,26 +1,79 @@
-import React, {useState} from 'react'
-import {Switch, Button, IconButton} from '@material-ui/core';
+import React, {useState, useEffect, useRef} from 'react'
+import {Switch, Button, IconButton, Drawer, useTheme, useMediaQuery} from '@material-ui/core';
 import DarkMode from '@material-ui/icons/Brightness3';
+import MenuIcon from '@material-ui/icons/Menu';
+import ClearIcon from '@material-ui/icons/Clear';
 import LightMode from '@material-ui/icons/BrightnessHigh';import {useSelector, useDispatch} from 'react-redux';
 import {changeWeather} from '../actions'
 
 export default function Header(props) {
     const weather = useSelector(state => state.weather);
     const dispatch = useDispatch();
-    const [imperial, setImperial] = useState(false)
+    const navbar = useRef(null);
+    const header = useRef(null);
+    const overlay = useRef(null);
+    const [imperial, setImperial] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+    const theme = useTheme();
+    const mobile = useMediaQuery(theme.breakpoints.down(800))
+
+    useEffect(() => {
+        detectDarkMode();
+        console.log(darkMode);
+    }, [])
+    useEffect(() => {
+        if (darkMode) {
+            document.querySelector('body').classList.add('darkmode');
+        } else {
+            document.querySelector('body').classList.remove('darkmode');
+        }
+    }, [darkMode])
     const switchChange = () => {
         setImperial(!imperial);
         let weatherObject = {...weather};
         weatherObject.metric = imperial;
         dispatch(changeWeather(weatherObject));
     }
+    const openNavbar = () => {
+        if (!navbar.current.classList.contains('opened')) {
+            navbar.current.classList.add('opened');
+            overlay.current.style.display = 'block';
+            setTimeout(() => {
+                overlay.current.classList.add('visible')
+            }, 100)
+        } else {
+            navbar.current.classList.remove('opened');
+            overlay.current.classList.remove('visible');
+            setTimeout(() => {
+                overlay.current.style.display = 'none';
+            }, 350);
+        }
+    }
+    const detectDarkMode = () => {
+        if (window.localStorage.darkMode) {
+            setDarkMode(JSON.parse(window.localStorage.darkMode));
+        }
+    }
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+        window.localStorage.darkMode = !darkMode;
+        console.log(window.localStorage.darkMode);
+
+    }
     return (
-        <div className='header'>
+        <div className='header' ref={header}>
+            {mobile ? <div className='overlay' ref={overlay} onClick={openNavbar}></div> : ''}
+            {mobile ? <IconButton classes={{root: 'open-navbar'}} onClick={openNavbar}>
+                <MenuIcon />
+            </IconButton> : ''}
             <a className='logo' href='/'>
                 <img alt='logo' src='logo.svg' />
                 <h2>Weather App</h2>
             </a>
-            <div className='buttons'>
+            <div className='buttons' ref={navbar}>
+                {mobile ? <IconButton classes={{root: 'close-navbar'}} onClick={openNavbar}>
+                    <ClearIcon />
+                </IconButton> : ''}
                 <div className='toggles'>
                     <div className='temperature'>
                         <span>C</span>
@@ -28,8 +81,8 @@ export default function Header(props) {
                         <span>F</span>
                     </div>
                     <div className='dark-light'>
-                        <IconButton>
-                            <DarkMode />
+                        <IconButton onClick={toggleDarkMode}>
+                            {darkMode ? <LightMode /> : <DarkMode />}
                         </IconButton>
                     </div>
                 </div>

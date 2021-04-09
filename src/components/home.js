@@ -11,6 +11,8 @@ import {Autocomplete} from '@material-ui/lab';
 import {TextField} from '@material-ui/core';
 import useAutocomplete from '../util/useAutocomplete';
 import LoadingScreen from './loadingScreen';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+
 
 export default function Home() {
     const weather = useSelector(state => state.weather)
@@ -23,12 +25,27 @@ export default function Home() {
     const [autocomplete, setAutocomplete] = useState([]);
     const [search, setSearch] = useState('');
     const [loadingScreen, setLoadingScreen] = useState(true);
+    const [error, setError] = useState(false);
 
     const cityIDParam  = useParams();
-    const cityID = useGeolocate();
-    const searchText = useSearch(search);
-    const loading = useFetch(searchText ? searchText : cityIDParam ? cityIDParam : cityID);
+    const {cityID, geolocateError} = useGeolocate();
+
+    const {searchID, searchIDError} = useSearch(search);
+    console.log(searchIDError);
+    const {loading, fetchError} = useFetch(searchID ? searchID : cityIDParam ? cityIDParam : cityID);
     const autocompleteArray = useAutocomplete(autocomplete);
+    console.log(autocompleteArray);
+
+    const autocompleteTheme = createMuiTheme({
+        overrides: {
+            MuiAutocomplete: {
+                listbox: {
+                    backgroundColor: 'black',
+
+                }
+            }
+        }
+    })
 
     useEffect(() => {
         checkForFavorite();
@@ -39,12 +56,24 @@ export default function Home() {
                     setLoadingScreen(false);
                 }, 500)
             }
+        } 
+    }, [loading, cityID])
+
+    //Error handling
+    useEffect(() => {
+        if (geolocateError) {
+            setError(true);
+        } if (fetchError) {
+            setError(true);
+        } if (searchIDError) {
+            setError(true);
         }
-    }, [loading])
+    }, [geolocateError, fetchError, searchIDError])
     const checkForFavorite = () => {
         if (!loading) {
             if (window.localStorage.favorites) {
                 let favorites = JSON.parse(window.localStorage.favorites);
+                // console.log(favorites)
                 if (favorites.includes(weather.cityID)) {
                     changeFavoriteButton();
                 }
@@ -63,7 +92,7 @@ export default function Home() {
                     return favorite === weather.cityID;
                 })
                 favorites.splice(index, 1);
-                console.log(favorites);
+                // console.log(favorites);
                 changeFavoriteButton('remove');
             } else {
                 favorites.push(weather.cityID);
@@ -72,18 +101,20 @@ export default function Home() {
         }
         window.localStorage.favorites = JSON.stringify(favorites);
 
-        console.log(window.localStorage);
+        // console.log(window.localStorage);
     }
     const changeFavoriteButton = (remove) => {
         if (!loading) {
             if (remove === 'remove') {
-                console.log(favoriteButton.current);
+                // console.log(favoriteButton.current);
                 favoriteButton.current.classList.remove('short');
                 setTimeout(() => {
                     favoriteButton.current.classList.remove('checked');
                 }, 350)
             } else {
-                favoriteButton.current.classList.add('checked');
+                if (favoriteButton.current) {
+                    favoriteButton.current.classList.add('checked');
+                }
                 setTimeout(() => {
                     if (favoriteButton.current) {
                         favoriteButton.current.classList.add('short');
@@ -94,7 +125,7 @@ export default function Home() {
     }
     const autocompleteHandler = (e) => {
         setAutocomplete(e.target.value)
-        console.log(e.target.value)
+        // console.log(e.target.value)
     }
     const searchOnChange = (e, values) => {
         setSearch(values);
@@ -103,21 +134,30 @@ export default function Home() {
         <div className='home'>
             {loadingScreen ? <LoadingScreen ref={loadingScreenRef}/> : ''}
             <Header location='Home'/>
-            <Autocomplete
-                id="combo-box-demo"
-                options={autocompleteArray}
-                getOptionLabel={(option) => option}
-                style={{ width: 300 }}
-                renderInput={(params) => <TextField {...params} ref={textField} label="City Search" variant='outlined' onChange={autocompleteHandler}/>}
-                loading={false}
-                onChange={searchOnChange}
-                classes={{root: 'autocomplete'}}
-            />
+            {error ? '' : 
+            <ThemeProvider theme={autocompleteTheme}>
+                <Autocomplete
+                    id="combo-box-demo"
+                    options={autocompleteArray}
+                    getOptionLabel={(option) => option}
+                    style={{ width: 300 }}
+                    renderInput={(params) => <TextField {...params} ref={textField} label="City Search" variant='outlined' onChange={autocompleteHandler}/>}
+                    loading={false}
+                    onChange={searchOnChange}
+                    classes={{root: 'autocomplete'}}
+                />
+            </ThemeProvider>
+            }
             {loading ? 
                 <div className='loading-panel'>
                     <h1>Loading...</h1>
                 </div>
-            :   
+            : error ? 
+                <div className='error'>
+                    <h1>An error has occoured</h1>
+                    <h2>Please try again</h2>
+                </div>
+            :
                 <div className='main-panel'>
                     <div className='panel-header'>
                         <div className='temp-info'>

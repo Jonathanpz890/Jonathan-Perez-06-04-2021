@@ -12,22 +12,26 @@ export default function useAutocomplete(text) {
     // const apikey = 'VBzXMPmu5eWkDlUivT7VdIUWZYEqAG0H';
     // const apikey = '5eJbuDZmUMEZGQ16FJ0uDuhGvMOXu366';
     // const apikey = 'lBu66EmnhBvyZs1LrbGEdpAoIngA2F9G';
-    const apikey = 'kY8Opl0WFOzNYorp5nmoX4fHMD3VSu2N';
+    const apikey = '5mLooQmy9jmzMXfrkq1DG5rbTAC2RDqr';
 
-    const [loading, setLoading] = useState(true);
+    const [autocompleteError, setAutocompleteError] = useState(false);
     const [autocomplete, setAutocomplete] = useState([]);
     // console.log(loading);
 
     useEffect(() => {
         let autocompleteArray = [];
-        fetch(`http://dataservice.accuweather.com/locations/v1/cities/autocomplete?apikey=${apikey}&q=${text}`)
+        fetch(`https://dataservice.accuweather.com/locations/v1/cities/autocomplete?apikey=${apikey}&q=${text}`)
         .then(res => res.json())
         .then(data => {
             data.forEach(city => {
                 autocompleteArray.push(city.LocalizedName);
             })
             setAutocomplete(autocompleteArray);
+        }).catch(error => {
+            console.log(error)
+            setAutocompleteError(true)
         })
+
     }, [text]) 
     return autocomplete;
 }

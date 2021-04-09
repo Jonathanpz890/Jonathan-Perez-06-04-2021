@@ -11,17 +11,17 @@ export default function useFavorites(favorites) {
     // const apikey = 'VBzXMPmu5eWkDlUivT7VdIUWZYEqAG0H';
     // const apikey = '5eJbuDZmUMEZGQ16FJ0uDuhGvMOXu366';
     // const apikey = 'lBu66EmnhBvyZs1LrbGEdpAoIngA2F9G';
-    const apikey = 'dpboAufPfAvktT4ycGW1pGddDzDtC5hq';
     // const apikey = 'YyNBnCsnjBjIUxcFzA5rtGGe2jdLSUwA';
+    const apikey = '5mLooQmy9jmzMXfrkq1DG5rbTAC2RDqr';
 
-
+    const [favoriteListError, setFavoriteListError] = useState(false);
     const [favoriteList, setFavoriteList] = useState([]);
     useEffect(async () => {
         const tempList = [];
         //city name, current temp, title
         console.log(favorites);
         for (const favorite of favorites) {
-            if (favorite.length < 1) {break};
+            if (!favorite) {break};
             // favorites.forEach(async (favorite, index) => {
             let item = {
                 city: '',
@@ -32,23 +32,26 @@ export default function useFavorites(favorites) {
                 },
                 title: ''
             }
-            await fetch(`http://dataservice.accuweather.com/locations/v1/${favorite}?apikey=${apikey}`)
-            .then(res => res.json())
-            .then(data => {
-                item.city = data.LocalizedName;
+            const cityRes = await fetch(`https://dataservice.accuweather.com/locations/v1/${favorite}?apikey=${apikey}`).catch(error => {
+                console.log(error)
+                setFavoriteListError(true)
             })
-            await fetch(`http://dataservice.accuweather.com/currentconditions/v1/${favorite}?apikey=${apikey}&language=en`)
-            .then(res => res.json())
-            .then(data => {
-                item.currentTemp.c = Math.round(data[0].Temperature.Metric.Value);
-                item.currentTemp.f = Math.round(data[0].Temperature.Imperial.Value);
-                item.title = data[0].WeatherText;
+            if (!cityRes) {return}
+            const cityData = await cityRes.json();
+            item.city = cityData.LocalizedName;
+            const currentTempRes = await fetch(`https://dataservice.accuweather.com/currentconditions/v1/${favorite}?apikey=${apikey}&language=en`).catch(error => {
+                console.log(error)
+                setFavoriteListError(true)
             })
+            if (!currentTempRes) {return}
+            const currentTempData = await currentTempRes.json();
+            console.log(currentTempData);
+            item.currentTemp.c = Math.round(currentTempData[0].Temperature.Metric.Value);
+            item.currentTemp.f = Math.round(currentTempData[0].Temperature.Imperial.Value);
+            item.title = currentTempData[0].WeatherText;
             tempList.push(item);
-            // console.log(tempList);
         }
-        // console.log('tempList');
         setFavoriteList(tempList);
     }, [favorites])
-    return favoriteList;
+    return {favoriteList, favoriteListError};
 }

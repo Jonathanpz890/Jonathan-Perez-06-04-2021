@@ -12,9 +12,9 @@ export default function Favorites() {
     // console.log(weather);
     const [favorites, setFavorites] = useState([]);
     const [loadingScreen, setLoadingScreen] = useState(true);
+    const [error, setError] = useState(false);
+    const {favoriteList, favoriteListError} = useFavorites(favorites);
 
-    const favoriteList = useFavorites(favorites);
-    
     useEffect(() => {
         if (favoriteList.length < 1) {
             if (loadingScreen) {
@@ -29,7 +29,10 @@ export default function Favorites() {
         if (window.localStorage.favorites) {
             setFavorites(JSON.parse(window.localStorage.favorites));
         }
-    }, [])
+        if (favoriteListError) {
+            setError(true);
+        }
+    }, [favoriteListError])
     return (
         <div className='favorites'>
             {loadingScreen ? <LoadingScreen /> : ''}
@@ -46,6 +49,17 @@ export default function Favorites() {
                     />
                 })}
             </div>
+            {favoriteList.length < 1 && !error ? 
+                <div className='empty'>
+                    <h1>No Favorites</h1>
+                </div>
+            : ''}
+            {error ? 
+                <div className='error'>
+                    <h1>An error has occoured</h1>
+                    <h2>Please Try Again</h2>
+                </div>
+            : ''}
         </div>
     )
 }
