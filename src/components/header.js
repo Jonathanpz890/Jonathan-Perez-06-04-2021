@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import {Switch, Button, IconButton, Drawer, useTheme, useMediaQuery} from '@material-ui/core';
+import {Switch, Button, IconButton, useTheme, useMediaQuery} from '@material-ui/core';
 import DarkMode from '@material-ui/icons/Brightness3';
 import MenuIcon from '@material-ui/icons/Menu';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -9,17 +9,19 @@ import {changeWeather} from '../actions'
 export default function Header(props) {
     const weather = useSelector(state => state.weather);
     const dispatch = useDispatch();
+    //Refs
     const navbar = useRef(null);
     const header = useRef(null);
     const overlay = useRef(null);
+    //States
     const [imperial, setImperial] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+    //Mobile Detection
     const theme = useTheme();
     const mobile = useMediaQuery(theme.breakpoints.down(800))
 
     useEffect(() => {
         detectDarkMode();
-        console.log(darkMode);
     }, [])
     useEffect(() => {
         if (darkMode) {
@@ -57,8 +59,7 @@ export default function Header(props) {
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
         window.localStorage.darkMode = !darkMode;
-        console.log(window.localStorage.darkMode);
-
+        props.toggleDarkMode();
     }
     return (
         <div className='header' ref={header}>

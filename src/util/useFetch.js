@@ -1,29 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {useEffect, useState} from 'react';
+import {useDispatch} from 'react-redux';
 import {changeWeather} from '../actions'
+import useApiKey from './useApiKey';
+
 
 export default function useFetch(cityID) {
-    // const weather = useSelector(state => state.weather)
+    const apikey = useApiKey();
     const dispatch = useDispatch();
-    // const apikey = 'tS4fpOANx6ipQMJdAy0MeC3gSiGVaarH';
-    // const apikey = 'ff6qcnN7nPv193t2sPEYmtXp48ABHgFN';
-    // const apikey = 'FoxoAhAfxFWAeI6WnFSl0GmKwxLjRsgq';
-    // const apikey = 'eduzhxG2ainxv6XCkyiyagUCCZJOVwaG';
-    // const apikey = 'WWX2pD327lzNkI4dGD6IKAK88Ae6Q78C';
-    // const apikey = 'VylUpohIp2nE54xHyyiO9GhzvgA0KA0Z';
-    // const apikey = 'fUcsADNu1RmcaIoZ4q3M4lieZhIAxcwo';
-    // const apikey = 'YVKWxUxLkOv8GhGoiGLbUWJAzC3khnmC';
-    // const apikey = 'VBzXMPmu5eWkDlUivT7VdIUWZYEqAG0H';
-    // const apikey = '5eJbuDZmUMEZGQ16FJ0uDuhGvMOXu366';
-    // const apikey = 'lBu66EmnhBvyZs1LrbGEdpAoIngA2F9G';
-    const apikey = '5mLooQmy9jmzMXfrkq1DG5rbTAC2RDqr';
-    
+    //States
     const [loading, setLoading] = useState(true)
     const [fetchError, setFetchError] = useState(false);
 
     useEffect(() => {
         const search = async () => {
-            console.log(cityID);
             if (!cityID) {
                 if (cityID === null) {
                     setLoading(false);
@@ -44,7 +33,6 @@ export default function useFetch(cityID) {
                 setFetchError(true);
             })
             if (!cityNameRes) {return}
-            console.log(cityNameRes);
             const cityNameData = await cityNameRes.json();
             if (!cityNameData) {return}
             weatherObject.city = cityNameData.LocalizedName;
@@ -101,9 +89,7 @@ export default function useFetch(cityID) {
                 weatherObject.fiveDay[index].minTemp.f = fore.Temperature.Minimum.Value;
             })
 
-            console.log(weatherObject);
             dispatch(changeWeather(weatherObject))
-            console.log('updated');
             setLoading(false);
         }
         search();

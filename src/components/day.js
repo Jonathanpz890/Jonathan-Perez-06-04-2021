@@ -1,8 +1,6 @@
 import React from 'react'
-import {useSelector} from 'react-redux';
 
 export default function Day(props) {
-    const weather = useSelector(state => state.weather);
     return (
         <div className='day'>
             <h2>{props.dayName}</h2>

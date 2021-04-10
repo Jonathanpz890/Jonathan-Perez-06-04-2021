@@ -2,17 +2,18 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import Header from './header';
 import '../App.scss';
-import useFetch from '../util/useFetch';
 import Favorite from './favorite';
 import useFavorites from '../util/useFavorites';
 import LoadingScreen from './loadingScreen';
 
 export default function Favorites() {
+    //Redux state
     const weather = useSelector(state => state.weather);
-    // console.log(weather);
+    //States
     const [favorites, setFavorites] = useState([]);
     const [loadingScreen, setLoadingScreen] = useState(true);
     const [error, setError] = useState(false);
+    //Hooks
     const {favoriteList, favoriteListError} = useFavorites(favorites);
 
     useEffect(() => {
@@ -32,7 +33,8 @@ export default function Favorites() {
         if (favoriteListError) {
             setError(true);
         }
-    }, [favoriteListError])
+    }, [favoriteListError, favoriteList.length, loadingScreen])
+    
     return (
         <div className='favorites'>
             {loadingScreen ? <LoadingScreen /> : ''}
